@@ -1,0 +1,14 @@
+[
+	{
+		"mac" : "D8:A2:5E:24:XX:XX",
+		"desc": "my laptop"
+	},
+	{
+		"mac" : "C0:9F:42:58:XX:XX",
+		"desc": "my router"
+	},
+	{
+		"mac" : "41:43:42:58:XX:XX",
+		"desc": "my phone"
+	}
+]
