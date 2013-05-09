@@ -4,7 +4,7 @@ small hacky script to check which are the devices on your local subnet.
 
 ## prerequisite
 
-	arp-scan, node, coffee-script
+	arp-scan, nmap, node, coffee-script
 
 ## update database
 
@@ -12,6 +12,7 @@ small hacky script to check which are the devices on your local subnet.
 * fill up database.json with your machines mac & name
 
 ## launch
-	for now...
 
-	sudo knockknock.sh | coffee knockknock.coffee
+	sudo coffee knockknock.coffee
+
+sudo is needed for arp or nmap scan.

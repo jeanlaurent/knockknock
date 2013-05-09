@@ -2,7 +2,20 @@ events = require 'events'
 util = require 'util'
 fs = require 'fs'
 spawn = require('child_process').spawn
+exec = require('child_process').exec
 
+class ArpScan
+	scan : (callback) ->
+		console.log '-> arp scan'
+		exec './scripts/knockknock.sh', (error,stdout,stderr) ->
+			arphosts = []
+			lines = stdout.split '\n'
+			for line in lines
+				words = line.split ' '
+				if words[0].length > 0
+					arphosts.push new Host words[0], words[1]
+			callback arphosts
+			
 class NmapScan
 	constructor: (@host) ->
 		@data=""
@@ -19,7 +32,6 @@ class NmapScan
 			console.log "#{@data}"
 			console.log "exit code is : #{code}"
 			@nmap.stdout.end();
-	
 
 
 class Host
@@ -45,23 +57,19 @@ class Hosts extends events.EventEmitter
 		@database = new HostDatabase()
 		@on 'new host', @newHost
 
-	processStdin: () ->
-		stdin = process.openStdin(); 
-		process.stdin.setEncoding 'utf8'
+	scan: () ->
+		new ArpScan().scan @addAll # dirty, dirty
 
-		process.stdin.on 'data', (chunk) =>
-			lines = chunk.split '\n'
-			for line in lines
-				words = line.split ' '
-				if words[0].length > 0
-					@add words[0], words[1]
-
-	add: (ip, mac) ->
+	add: (ip, mac) =>
 		newHost = new Host ip, mac
 		newHost.name = @database.lookup mac
 		@hosts.push newHost
-		new NmapScan(newHost).scan()	
+		# new NmapScan(newHost).scan()	
 		@emit 'new host', newHost
+
+	addAll: (someHosts) =>
+		for host in someHosts
+			@add host.ip, host.mac
 
 	lastHost: () ->
 		@hosts[@hosts.length-1]
@@ -72,5 +80,4 @@ class Hosts extends events.EventEmitter
 		console.log "Hey we got a new host #{host.ip} / #{host.mac} => #{id}"
 
 
-
-new Hosts().processStdin()
+new Hosts().scan()
