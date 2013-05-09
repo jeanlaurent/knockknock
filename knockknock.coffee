@@ -1,6 +1,26 @@
 events = require 'events'
 util = require 'util'
 fs = require 'fs'
+spawn = require('child_process').spawn
+
+class NmapScan
+	constructor: (@host) ->
+		@data=""
+	
+	scan : ->
+		@nmap = spawn('nmap',['-O',@host.ip,'--host-timeout','3000'])
+		console.log "launching nmap with #{@nmap.pid}"
+		@nmap.stdout.on 'data', (data) =>
+			@data = "#{@data}#{data.toString()}"
+		@nmap.on 'exit', (code) =>
+			console.log "================"
+			console.log "scan for #{@host.name}" 
+			console.log "data received : "
+			console.log "#{@data}"
+			console.log "exit code is : #{code}"
+			@nmap.stdout.end();
+	
+
 
 class Host
 	constructor: (@ip, @mac) ->
@@ -40,6 +60,7 @@ class Hosts extends events.EventEmitter
 		newHost = new Host ip, mac
 		newHost.name = @database.lookup mac
 		@hosts.push newHost
+		new NmapScan(newHost).scan()	
 		@emit 'new host', newHost
 
 	lastHost: () ->
@@ -49,5 +70,7 @@ class Hosts extends events.EventEmitter
 		id = "unknown !"
 		id = "#{host.name}" if host.name?
 		console.log "Hey we got a new host #{host.ip} / #{host.mac} => #{id}"
+
+
 
 new Hosts().processStdin()
