@@ -4,12 +4,12 @@ small hacky script to check which are the devices on your local subnet.
 
 ## prerequisite
 
-	arp-scan, nmap, node, coffee-script
+	arp-scan(1.8), nmap (6.25), node, coffee-script
 
 ## update database
 
 * rename example-database.json to database.json
-* fill up database.json with your machines mac & name
+* fill up database.json with your machines mac & desc
 
 ## launch
 
