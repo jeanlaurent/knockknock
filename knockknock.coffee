@@ -16,15 +16,22 @@ class ArpScanner
 			callback arphosts
 		
 class NmapScanner
+
+	match: (stdout,regexp,value) ->
+		result = stdout.match(new RegExp regexp)
+		return result[value] if result? and result.length > value
+		return "???"
+
+
 	scan : (host, callback) ->
-		exec "nmap -O #{host.ip} --host-timeout 3000", (error,stdout) ->
+		exec "nmap -O #{host.ip} --host-timeout 3000", (error,stdout) =>
 			# range check on regexp is needed
 			result =
-				localName : stdout.match(new RegExp /Nmap scan report for (.*) \((.*)\)/i)[1]
-				macManufacturer : stdout.match(new RegExp /Mac Address: (.*) \((.*)\)/i)[2]
-				deviceType : stdout.match(new RegExp /Device type: (.*)/i)[1]
-				os : stdout.match(new RegExp /Running: (.*)/i)[1]
-				osDetails : stdout.match(new RegExp /OS details: (.*)/i)[1]
+				localName : @match stdout, /Nmap scan report for (.*) \((.*)\)/i,1
+				macManufacturer : @match stdout, /Mac Address: (.*) \((.*)\)/i, 2
+				deviceType : @match stdout,/Device type: (.*)/i,1
+				os : @match stdout,/Running: (.*)/i,1
+				osDetails : @match stdout,/OS details: (.*)/i,1
 			callback host, result
 
 class Host
@@ -62,6 +69,7 @@ class Hosts extends events.EventEmitter
 		newHost.name = @database.lookup mac
 		@hosts.push newHost
 		@nmapScanner.scan newHost, (newHost, result) ->
+			console.log "nmap fo #{newHost.ip}"
 			console.log result
 		@emit 'new host', newHost
 
