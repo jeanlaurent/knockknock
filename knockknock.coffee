@@ -14,7 +14,7 @@ class ArpScanner
 				if words[0].length > 0
 					arphosts.push new Host words[0], words[1]
 			callback arphosts
-		
+
 class NmapScanner
 
 	match: (stdout,regexp,value) ->
@@ -39,14 +39,17 @@ class Host
 
 class HostDatabase
 	constructor: () ->
-		@database = JSON.parse fs.readFileSync "database.json","utf-8"
+		try
+			@database = JSON.parse fs.readFileSync "database.json","utf-8"
+		catch e
+			@database = {}
 
 	update: (host) ->
 		console.log @database
 		for dbHost in @database when host.mac == dbHost.mac
 			dbHost = host
 		console.log @database
-		
+
 	lookup: (mac) ->
 		return host.desc for host in @database when host.mac == mac
 
